@@ -1,0 +1,24 @@
+src/
+ ├── api/
+ │    ├── axiosClient.js
+ │    ├── produitApi.js
+ │    ├── livreurApi.js
+ │    ├── preparateurApi.js
+ │    └── commandeApi.js
+ │
+ ├── components/
+ │    ├── CrudTable.jsx
+ │    ├── ModalForm.jsx
+ │    └── Navbar.jsx
+ │
+ ├── hooks/
+ │    └── useCrud.js
+ │
+ ├── pages/
+ │    ├── ProduitPage.jsx
+ │    ├── LivreurPage.jsx
+ │    ├── PreparateurPage.jsx
+ │    └── CommandePage.jsx
+ │
+ ├── App.jsx
+ └── main.jsx
