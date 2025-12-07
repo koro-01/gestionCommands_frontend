@@ -7,7 +7,11 @@
     "deliveryPersonnel": "Delivery Personnel",
     "preparateurs": "Preparateurs",
     "commandsByStatus": "Commands by Status",
-    "productsPerformance": "Products Performance"
+    "productsPerformance": "Products Performance",
+    "revenueByStatus": "Revenue by Status",
+    "topProductsRevenue": "Top Products Revenue",
+    "dailyCommandTrends": "Daily Command Trends",
+    "revenueByCategory": "Revenue by Category"
   },
   "commands": {
     "title": "Commands Management",

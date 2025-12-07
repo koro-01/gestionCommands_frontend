@@ -7,7 +7,11 @@
     "deliveryPersonnel": "موظفو التوصيل",
     "preparateurs": "المجهزون",
     "commandsByStatus": "الطلبات حسب الحالة",
-    "productsPerformance": "أداء المنتجات"
+    "productsPerformance": "أداء المنتجات",
+    "revenueByStatus": "الإيرادات حسب الحالة",
+    "topProductsRevenue": "إيرادات أفضل المنتجات",
+    "dailyCommandTrends": "اتجاهات الطلبات اليومية",
+    "revenueByCategory": "الإيرادات حسب الفئة"
   },
   "commands": {
     "title": "إدارة الطلبات",

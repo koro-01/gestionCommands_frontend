@@ -16,6 +16,9 @@ import {
 } from "react-icons/fa";
 import { BsSpeedometer2 } from "react-icons/bs";
 
+// framer-motion
+import { motion } from "framer-motion";
+
 export default function Sidebar({ isOpen }) {
   const { t } = useTranslation();
   const [expandedMenu, setExpandedMenu] = useState("commands");
@@ -24,55 +27,35 @@ export default function Sidebar({ isOpen }) {
     setExpandedMenu(expandedMenu === menu ? null : menu);
   };
 
-  // I added a 'color' property to each item to match your Dashboard Cards
   const menuItems = [
     {
       id: "commands",
       icon: FaClipboardList,
-      color: "#6366F1", // Indigo (Matches "Total Commands")
+      color: "#6366F1",
       title: t("commands.title"),
-      items: [
-        {
-          label: t("commands.formCommand.allCommands") || t("commands.title"),
-          path: "/commands",
-        },
-      ],
+      items: [{ label: t("commands.formCommand.allCommands"), path: "/commands" }],
     },
     {
       id: "products",
       icon: FaShoppingBag,
-      color: "#10B981", // Emerald (Matches "Total Products")
+      color: "#10B981",
       title: t("dashboard.totalProducts"),
-      items: [
-        {
-          label: t("commands.formCommand.allProducts") || "All Products",
-          path: "/products",
-        },
-      ],
+      items: [{ label: t("commands.formCommand.allProducts"), path: "/products" }],
     },
     {
       id: "livreurs",
       icon: FaTruck,
-      color: "#F97316", // Orange (Matches "Delivery")
+      color: "#F97316",
       title: t("dashboard.deliveryPersonnel"),
-      items: [
-        {
-          label: t("commands.formCommand.allLivreurs") || "All Livreurs",
-          path: "/livreurs",
-        },
-      ],
+      items: [{ label: t("commands.formCommand.allLivreurs"), path: "/livreurs" }],
     },
     {
       id: "preparateurs",
       icon: FaUserCog,
-      color: "#D946EF", // Fuchsia (Matches "Preparateurs")
+      color: "#D946EF",
       title: t("dashboard.preparateurs"),
       items: [
-        {
-          label:
-            t("commands.formCommand.allPreparateurs") || "All Preparateurs",
-          path: "/preparateurs",
-        },
+        { label: t("commands.formCommand.allPreparateurs"), path: "/preparateurs" },
       ],
     },
   ];
@@ -80,37 +63,22 @@ export default function Sidebar({ isOpen }) {
   return (
     <aside className={`sidebar ${isOpen ? "open" : "closed"}`}>
       <div className="sidebar-header">
-        <h2
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Replaced FcLineChart with a cleaner icon styled with a Brand Gradient or primary color */}
-          <BsSpeedometer2
-            size={25}
-            style={{
-              marginRight: "10px",
-              color: "#2563EB", // Primary Brand Blue
-            }}
-          />
+        <h2 style={{ display: "flex", alignItems: "center" }} className="gap-2.5 whitespace-nowrap">
+          <motion.div
+            whileHover={{ rotate: 15, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <BsSpeedometer2 size={25} style={{ marginRight: 10, color: "#2563EB" }} />
+          </motion.div>
           {t("dashboard.title")}
         </h2>
       </div>
 
       <nav className="sidebar-nav">
-        <Link
-          to="/"
-          className="nav-item"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          {/* Home Icon: A neutral Sky Blue or Slate looks professional */}
-          <AiOutlineHome style={{ marginRight: "10px", color: "#3B82F6" }} />
+        <Link to="/" className="nav-item gap-2.5 whitespace-nowrap" style={{ display: "flex", alignItems: "center" }}>
+          <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
+            <AiOutlineHome size={22} style={{ marginRight: 10, color: "#3B82F6" }} />
+          </motion.div>
           {t("dashboard.title")}
         </Link>
 
@@ -123,27 +91,33 @@ export default function Sidebar({ isOpen }) {
               <button
                 className={`nav-menu-title ${isActive ? "active" : ""}`}
                 onClick={() => toggleMenu(menu.id)}
-                // Optional: Add a subtle border-left using the color when active
-                style={
-                  isActive ? { borderLeft: `4px solid ${menu.color}` } : {}
-                }
+                style={isActive ? { borderLeft: `4px solid ${menu.color}` } : {}}
               >
-                <Icon
-                  className="menu-icon"
-                  // Apply the specific color defined in menuItems
-                  style={{ marginRight: 8, color: menu.color }}
-                />
+                <motion.div
+                  whileHover={{ scale: 1.2 }}
+                  animate={isActive ? { rotate: [0, 5, -5, 0] } : {}}
+                  transition={{ duration: 0.4 }}
+                >
+                  <Icon size={20} style={{ marginRight: 8, color: menu.color }} />
+                </motion.div>
+
                 {menu.title}
                 <span className="chevron">›</span>
               </button>
+
               {isActive && (
-                <div className="nav-submenu">
+                <motion.div
+                  className="nav-submenu"
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
                   {menu.items.map((item, idx) => (
                     <Link key={idx} to={item.path} className="nav-item">
                       {item.label}
                     </Link>
                   ))}
-                </div>
+                </motion.div>
               )}
             </div>
           );

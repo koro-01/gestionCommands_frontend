@@ -80,11 +80,17 @@ export default function Header({ onMenuClick, darkMode, onThemeToggle }) {
           className="theme-toggle"
         >
           {darkMode ? (
-            // Sun: Warm Amber (Visible and glowing against dark background)
-            <MdOutlineWbSunny style={{ color: "#F59E0B" }} />
+            <MdOutlineWbSunny
+              className="theme-icon sun-animate"
+              size={24}
+              style={{ color: "#F59E0B" }}
+            />
           ) : (
-            // Moon: Cool Indigo (Clean and crisp against light background)
-            <MdOutlineDarkMode style={{ color: "#6366F1" }} />
+            <MdOutlineDarkMode
+              className="theme-icon moon-animate"
+              size={24}
+              style={{ color: "#6366F1" }}
+            />
           )}
         </button>
       </div>

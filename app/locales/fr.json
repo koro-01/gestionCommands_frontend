@@ -8,6 +8,10 @@
     "preparateurs": "Préparateurs",
     "commandsByStatus": "Commandes par Statut",
     "productsPerformance": "Performance des Produits"
+    ,"revenueByStatus": "Revenu par Statut",
+    "topProductsRevenue": "Revenu des Meilleurs Produits",
+    "dailyCommandTrends": "Tendances Quotidiennes des Commandes",
+    "revenueByCategory": "Revenu par Catégorie"
   },
   "commands": {
     "title": "Gestion des commandes",

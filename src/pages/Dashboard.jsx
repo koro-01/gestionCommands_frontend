@@ -1,34 +1,33 @@
-import { MdLocalGroceryStore } from "react-icons/md";
-import { BsFillBoxSeamFill } from "react-icons/bs";
-("use client");
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import StatCard from "../components/cards/StatCard";
 import ChartCard from "../components/charts/ChartCard";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import "../styles/pages/dashboard.css";
-import { FaBoxOpen, FaShoppingBag, FaTruck, FaUserCog } from "react-icons/fa";
-import {
-  FaClipboardList,
-  FaBoxes,
-  FaMotorcycle,
-  FaUsersCog,
-} from "react-icons/fa";
+
+import { BsFillBoxSeamFill } from "react-icons/bs";
+import { FaShoppingBag, FaTruck, FaUserCog } from "react-icons/fa";
 
 import useCrud from "../hooks/useCrud";
 import commandeApi from "../api/commandeApi";
 import produitApi from "../api/produitApi";
 import livreurApi from "../api/livreurApi";
 import preparateurApi from "../api/preparateurApi";
+import AnimatedIcon from "@/components/AnimatedIcon";
 
 export default function Dashboard() {
   const { t } = useTranslation();
 
+  // Fetch data
   const { items: commandes } = useCrud(commandeApi);
   const { items: produits } = useCrud(produitApi);
   const { items: livreurs } = useCrud(livreurApi);
   const { items: preparateurs } = useCrud(preparateurApi);
 
+  // States
   const [stats, setStats] = useState({
     totalCommands: 0,
     totalProducts: 0,
@@ -39,10 +38,15 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const timersRef = useRef({});
 
+  // Charts
   const [commandsByStatus, setCommandsByStatus] = useState([]);
   const [productsPerformance, setProductsPerformance] = useState([]);
+  const [revenueByStatus, setRevenueByStatus] = useState([]);
+  const [topProductsRevenue, setTopProductsRevenue] = useState([]);
+  const [commandTrends, setCommandTrends] = useState([]);
+  const [revenueByCategory, setRevenueByCategory] = useState([]);
 
-  // Update stats and chart data
+  // --- Step 2a: Update stats & charts ---
   useEffect(() => {
     if (!commandes || !produits || !livreurs || !preparateurs) return;
 
@@ -67,16 +71,66 @@ export default function Dashboard() {
 
     // Products performance
     setProductsPerformance(
-      produits.map((p) => ({
-        name: p.description ?? p.name ?? "-",
-        value: p.Qtte ?? 0,
-      }))
+      produits.map((p) => ({ name: p.description ?? "-", value: p.Qtte ?? 0 }))
+    );
+
+    // Revenue by status
+    const revenueStatus = Object.entries(
+      commandes.reduce((acc, cmd) => {
+        const status = cmd.status || "Unknown";
+        const product = produits.find((p) => p.id === cmd.produit_id);
+        const qty = Number(cmd.Qtte ?? 1);
+        const price = parseFloat(product?.P_V ?? 0);
+        acc[status] = (acc[status] || 0) + qty * price;
+        return acc;
+      }, {})
+    ).map(([name, value]) => ({ name, value }));
+    setRevenueByStatus(revenueStatus);
+
+    // Top products revenue
+    const topRevenue = produits
+      .map((p) => {
+        const relatedCmds = commandes.filter((c) => c.produit_id === p.id);
+        const revenue = relatedCmds.reduce(
+          (sum, c) => sum + c.Qtte * (p.P_V ?? 0),
+          0
+        );
+        return { name: p.description ?? "-", value: revenue };
+      })
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+    setTopProductsRevenue(topRevenue);
+
+    // Command trends by day
+    const trends = commandes.reduce((acc, cmd) => {
+      const date = new Date(cmd.created_at).toISOString().slice(0, 10);
+      acc[date] = (acc[date] || 0) + 1;
+      return acc;
+    }, {});
+    const trendsArray = Object.entries(trends)
+      .sort(([a], [b]) => new Date(a) - new Date(b))
+      .map(([name, value]) => ({ name, value }));
+    setCommandTrends(trendsArray);
+
+    // Revenue by product category
+    const categoryRevenue = produits.reduce((acc, p) => {
+      const relatedCmds = commandes.filter((c) => c.produit_id === p.id);
+      const revenue = relatedCmds.reduce(
+        (sum, c) => sum + c.Qtte * (p.P_V ?? 0),
+        0
+      );
+      const category = p.category ?? "Uncategorized";
+      acc[category] = (acc[category] || 0) + revenue;
+      return acc;
+    }, {});
+    setRevenueByCategory(
+      Object.entries(categoryRevenue).map(([name, value]) => ({ name, value }))
     );
 
     setLoading(false);
   }, [commandes, produits, livreurs, preparateurs]);
 
-  // Animate numbers for all stats
+  // --- Step 2b: Animate stats numbers ---
   useEffect(() => {
     const keys = [
       "totalCommands",
@@ -122,52 +176,119 @@ export default function Dashboard() {
     };
   }, [stats]);
 
-  if (loading) return <div className="loading">{t("dashboard.loading")}</div>;
+  // --- Step 3: Render dashboard ---
+  if (loading)
+    return (
+      <div className="dashboard-loading">
+        <div className="stats-grid">
+          {Array(4)
+            .fill(0)
+            .map((_, i) => (
+              <Skeleton key={i} height={100} />
+            ))}
+        </div>
+        <div className="charts-grid">
+          {Array(6)
+            .fill(0)
+            .map((_, i) => (
+              <Skeleton key={i} height={300} />
+            ))}
+        </div>
+      </div>
+    );
 
   return (
     <div className="dashboard">
       <h1>{t("dashboard.title")}</h1>
 
+      {/* Stats cards */}
       <div className="stats-grid">
         <StatCard
           title={t("dashboard.totalCommands")}
           value={displayed.totalCommands}
-          // Indigo: Professional, trustworthy, deep (Replaces standard Blue)
-          icon={<BsFillBoxSeamFill style={{ color: "#6366F1" }} />}
+          icon={
+            <AnimatedIcon>
+              <BsFillBoxSeamFill
+                style={{ color: "#6366F1", fontSize: "32px" }}
+              />
+            </AnimatedIcon>
+          }
         />
+
         <StatCard
           title={t("dashboard.totalProducts")}
           value={displayed.totalProducts}
-          // Emerald: Clean, crisp, implies assets/growth (Replaces standard Green)
-          icon={<FaShoppingBag style={{ color: "#10B981" }} />}
+          icon={
+            <AnimatedIcon>
+              <FaShoppingBag style={{ color: "#10B981", fontSize: "32px" }} />
+            </AnimatedIcon>
+          }
         />
+
         <StatCard
           title={t("dashboard.deliveryPersonnel")}
           value={displayed.totalLivreurs}
-          // Orange: Energetic, implies movement/transit (High visibility)
-          icon={<FaTruck style={{ color: "#F97316" }} />}
+          icon={
+            <AnimatedIcon>
+              <FaTruck style={{ color: "#F97316", fontSize: "32px" }} />
+            </AnimatedIcon>
+          }
         />
+
         <StatCard
           title={t("dashboard.preparateurs")}
           value={displayed.totalPreparateurs}
-          // Fuchsia/Pink: Creative, human-centric, modern pop (Replaces deep Purple)
-          icon={<FaUserCog style={{ color: "#D946EF" }} />}
+          icon={
+            <AnimatedIcon>
+              <FaUserCog style={{ color: "#D946EF", fontSize: "32px" }} />
+            </AnimatedIcon>
+          }
         />
       </div>
 
+      {/* Charts grid */}
       <div className="charts-grid">
         <ChartCard
           title={t("dashboard.commandsByStatus")}
           data={commandsByStatus}
           type="pie"
           dataKey="value"
+          colors={["#F59E0B", "#10B981", "#3B82F6", "#D946EF"]}
         />
         <ChartCard
           title={t("dashboard.productsPerformance")}
           data={productsPerformance}
           type="bar"
           dataKey="value"
-          color="#16A34A"
+          colors={["#16A34A"]}
+        />
+        <ChartCard
+          title={t("dashboard.revenueByStatus")}
+          data={revenueByStatus}
+          type="area"
+          dataKey="value"
+          colors={["#F97316"]}
+        />
+        <ChartCard
+          title={t("dashboard.topProductsRevenue")}
+          data={topProductsRevenue}
+          type="composed"
+          dataKey="value"
+          colors={["#3B82F6", "#6366F1"]}
+        />
+        <ChartCard
+          title={t("dashboard.dailyCommandTrends")}
+          data={commandTrends}
+          type="line"
+          dataKey="value"
+          colors={["#10B981"]}
+        />
+        <ChartCard
+          title={t("dashboard.revenueByCategory")}
+          data={revenueByCategory}
+          type="pie"
+          dataKey="value"
+          colors={["#F59E0B", "#3B82F6", "#D946EF", "#16A34A"]}
         />
       </div>
     </div>
