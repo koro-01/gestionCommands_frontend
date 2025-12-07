@@ -85,7 +85,7 @@ export default function Preparateurs() {
     <div className="preparateurs-page">
       <div className="page-header">
         <h1>{t("preparateurs.title")}</h1>
-        <button className="btn-primary" onClick={handleCreate}>
+        <button className="btn-primary flex justify-center items-center" onClick={handleCreate}>
           <FaPlus style={{ marginRight: 8 }} /> {t("preparateurs.new")}
         </button>
       </div>

@@ -215,7 +215,7 @@ export default function Commands() {
     <div className="commands-page">
       <div className="page-header">
         <h1>{t("commands.title")}</h1>
-        <button className="btn-primary" onClick={handleCreate}>
+        <button className="btn-primary flex justify-center items-center"  onClick={handleCreate}>
           <FaPlus style={{ marginRight: 8 }} /> {t("commands.newCommand")}
         </button>
       </div>
@@ -322,7 +322,7 @@ export default function Commands() {
                 >
                   {t("commands.totalPrice")}:
                 </td>
-                <td style={{ fontWeight: 700 }}>{totalPriceFormatted}</td>
+                <td style={{ fontWeight: 700 }}>{totalPriceFormatted}DH</td>
                 <td></td>
                 <td></td>
               </tr>

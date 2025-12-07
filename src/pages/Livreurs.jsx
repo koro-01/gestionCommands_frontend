@@ -84,7 +84,7 @@ export default function Livreurs() {
     <div className="livreurs-page">
       <div className="page-header">
         <h1>{t("livreurs.title")}</h1>
-        <button className="btn-primary" onClick={handleCreate}>
+        <button className="btn-primary flex justify-center items-center" onClick={handleCreate}>
           <FaPlus style={{ marginRight: 8 }} /> {t("livreurs.new")}
         </button>
       </div>

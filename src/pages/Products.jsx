@@ -87,7 +87,7 @@ export default function Products() {
     <div className="products-page">
       <div className="page-header">
         <h1>{t("products.title")}</h1>
-        <button className="btn-primary" onClick={handleCreate}>
+        <button className="btn-primary flex justify-center items-center" onClick={handleCreate}>
           <FaPlus style={{ marginRight: 8 }} /> {t("products.new")}
         </button>
       </div>

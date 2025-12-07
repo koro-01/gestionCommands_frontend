@@ -85,17 +85,15 @@ export default function Sidebar({ isOpen }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            // A dark slate color for the main title is usually cleaner than black
-            color: "#1E293B", 
           }}
         >
           {/* Replaced FcLineChart with a cleaner icon styled with a Brand Gradient or primary color */}
           <BsSpeedometer2
-            size={25} 
-            style={{ 
-                marginRight: "10px", 
-                color: "#2563EB" // Primary Brand Blue
-            }} 
+            size={25}
+            style={{
+              marginRight: "10px",
+              color: "#2563EB", // Primary Brand Blue
+            }}
           />
           {t("dashboard.title")}
         </h2>
@@ -126,12 +124,14 @@ export default function Sidebar({ isOpen }) {
                 className={`nav-menu-title ${isActive ? "active" : ""}`}
                 onClick={() => toggleMenu(menu.id)}
                 // Optional: Add a subtle border-left using the color when active
-                style={isActive ? { borderLeft: `4px solid ${menu.color}` } : {}}
+                style={
+                  isActive ? { borderLeft: `4px solid ${menu.color}` } : {}
+                }
               >
-                <Icon 
-                    className="menu-icon" 
-                    // Apply the specific color defined in menuItems
-                    style={{ marginRight: 8, color: menu.color }} 
+                <Icon
+                  className="menu-icon"
+                  // Apply the specific color defined in menuItems
+                  style={{ marginRight: 8, color: menu.color }}
                 />
                 {menu.title}
                 <span className="chevron">›</span>

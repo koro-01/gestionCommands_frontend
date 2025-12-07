@@ -34,6 +34,11 @@
   font-size: 18px;
   font-weight: 700;
   margin: 0;
+  color: #1e293b; /* Dark slate color for main title */
+}
+
+.dark .sidebar-header h2 {
+  color: #d1d5db; /* Light gray for dark mode */
 }
 
 .sidebar-nav {
