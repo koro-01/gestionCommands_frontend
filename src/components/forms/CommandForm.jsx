@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import "../../styles/components/command-form.css";
+import "../../styles/components/command-form.css"; // Assuming you have a separate CSS for this form
 
 import produitApi from "../../api/produitApi";
 import livreurApi from "../../api/livreurApi";

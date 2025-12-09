@@ -260,7 +260,7 @@ export default function Dashboard() {
           data={productsPerformance}
           type="bar"
           dataKey="value"
-          colors={["#16A34A"]}
+          colors={["#16A34A","#3B82F6"]}
         />
         <ChartCard
           title={t("dashboard.revenueByStatus")}
@@ -288,7 +288,7 @@ export default function Dashboard() {
           data={revenueByCategory}
           type="pie"
           dataKey="value"
-          colors={["#F59E0B", "#3B82F6", "#D946EF", "#16A34A"]}
+          colors={["#F59E0B", "#EF4444", "#3B82F6", "#D946EF", "#16A34A"]}
         />
       </div>
     </div>

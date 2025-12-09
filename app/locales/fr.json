@@ -36,6 +36,14 @@
     "edit": "Modifier",
     "delete": "Supprimer",
     "totalPrice": "Prix Total",
+    "loading":"Chargement du tableau de bord...",
+     "saveError": "Échec de l'enregistrement de la commande",
+      "created": "Commande créée !",
+      "updated": "Commande mise à jour !",
+      "deleted": "Commande supprimée !",
+      "deleteFailed": "Échec de la suppression de la commande",
+      "newCommandTitle": "Créer une nouvelle commande",
+      "next": "Suivant",
      "formCommand": {
         "nom": "Nom du client",
         "phone": "Numéro de téléphone",
@@ -58,7 +66,10 @@
         "allCommands": "Toutes les commandes",
         "allProducts": "Tous les produits",
         "allLivreurs": "Tous les livreurs",
-        "allPreparateurs": "Tous les préparateurs"
+        "allPreparateurs": "Tous les préparateurs",
+        "clientInfo": "Informations sur le client",
+        "productSelection": "Sélection de produit"
+
       }
   },
   "modal": {

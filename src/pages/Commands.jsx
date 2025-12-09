@@ -10,11 +10,14 @@ import preparateurApi from "../api/preparateurApi";
 import Modal from "../components/modals/Modal";
 import CommandForm from "../components/forms/CommandForm";
 import "../styles/pages/commands.css";
+import "../styles/components/multi-step-command-form.css";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 export default function Commands() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const {
     items: commands = [],
@@ -122,8 +125,7 @@ export default function Commands() {
   const loading = loadingCommands || relatedLoading;
 
   const handleCreate = () => {
-    setEditingCommand(null);
-    setShowModal(true);
+    navigate("/commands/new");
   };
 
   const handleEdit = (command) => {
