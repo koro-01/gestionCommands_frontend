@@ -9,6 +9,18 @@
     "commandsByStatus": "Commands by Status",
     "productsPerformance": "Products Performance"
   },
+  "wizard": {
+  "clientInfo": "Client Information",
+  "productStock": "Product & Stock",
+  "preparation": "Preparation",
+  "delivery": "Delivery",
+  "review": "Review & Confirm",
+  "step1": "Client",
+  "step2": "Product",
+  "step3": "Prepare",
+  "step4": "Deliver",
+  "step5": "Review"
+},
   "commands": {
     "title": "Commands Management",
     "newCommand": "New Command",

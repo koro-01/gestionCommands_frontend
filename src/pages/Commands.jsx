@@ -8,13 +8,19 @@ import livreurApi from "../api/livreurApi";
 import preparateurApi from "../api/preparateurApi";
 
 import Modal from "../components/modals/Modal";
-import CommandForm from "../components/forms/CommandForm";
+import CommandFormEdit from "../components/forms/CommandFormEdit";
 import "../styles/pages/commands.css";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+
+
 
 export default function Commands() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+
 
   const {
     items: commands = [],
@@ -33,6 +39,8 @@ export default function Commands() {
   const [editingCommand, setEditingCommand] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [error, setError] = useState(null);
+
+  
 
   const fetchRelated = async () => {
     try {
@@ -121,10 +129,10 @@ export default function Commands() {
 
   const loading = loadingCommands || relatedLoading;
 
-  const handleCreate = () => {
-    setEditingCommand(null);
-    setShowModal(true);
+ const handleCreate = () => {
+    navigate("/commands/new");
   };
+
 
   const handleEdit = (command) => {
     setEditingCommand(command);
@@ -215,6 +223,7 @@ export default function Commands() {
     <div className="commands-page">
       <div className="page-header">
         <h1>{t("commands.title")}</h1>
+     
         <button className="btn-primary flex justify-center items-center"  onClick={handleCreate}>
           <FaPlus style={{ marginRight: 8 }} /> {t("commands.newCommand")}
         </button>
@@ -336,7 +345,7 @@ export default function Commands() {
         onClose={() => setShowModal(false)}
         title={editingCommand ? t("modal.editTitle") : t("modal.createTitle")}
       >
-        <CommandForm
+        <CommandFormEdit
           command={editingCommand}
           onSave={handleSave}
           onCancel={() => setShowModal(false)}
