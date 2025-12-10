@@ -1,91 +1,105 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
-import MultiStepCommandForm from "../components/forms/MultiStepCommandForm";
+import CommandForm from "../components/forms/CommandForm";
 import commandeApi from "../api/commandeApi";
 import produitApi from "../api/produitApi";
 import livreurApi from "../api/livreurApi";
 import preparateurApi from "../api/preparateurApi";
 
 export default function NewCommandPage() {
-  const navigate = useNavigate();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const params = useParams();
 
-  const [loading, setLoading] = useState(true);
+  const isEdit = Boolean(params?.id);
+  const commandId = isEdit ? params.id : null;
+
+  const [command, setCommand] = useState(null);
   const [products, setProducts] = useState([]);
   const [livreurs, setLivreurs] = useState([]);
   const [preparateurs, setPreparateurs] = useState([]);
-  const [error, setError] = useState(null);
-
-  const fetchFormOptions = async () => {
-    try {
-      setLoading(true);
-
-      const [pRes, lRes, prRes] = await Promise.all([
-        produitApi.getAll(),
-        livreurApi.getAll(),
-        preparateurApi.getAll(),
-      ]);
-
-      setProducts(pRes?.data ?? pRes ?? []);
-      setLivreurs(lRes?.data ?? lRes ?? []);
-      setPreparateurs(prRes?.data ?? prRes ?? []);
-    } catch (err) {
-      console.error("Failed to fetch form options:", err);
-      setError(t("commands.errorLoadingRelated"));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchFormOptions();
-  }, []);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [pRes, lRes, prRes] = await Promise.all([
+          produitApi.getAll(),
+          livreurApi.getAll(),
+          preparateurApi.getAll(),
+        ]);
 
-  const handleSave = async (formData) => {
-    try {
-      const response = await commandeApi.create(formData);
+        setProducts(pRes?.data ?? []);
+        setLivreurs(lRes?.data ?? []);
+        setPreparateurs(prRes?.data ?? []);
 
-      if (response?.data?.message === "Not enough stock") {
-        alert(`⚠ ${response.data.message}. Available stock: ${response.data.stock}`);
-        return;
+        if (isEdit) {
+          const cmdRes = await commandeApi.getById(commandId);
+          setCommand(cmdRes?.data ?? null);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Failed to load data");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      alert(t("modal.createTitle"));
+    fetchData();
+  }, [commandId, isEdit]);
+
+  const handleSave = async (payload) => {
+    try {
+      if (isEdit) {
+        await commandeApi.update(commandId, payload);
+        alert("Command updated successfully!");
+      } else {
+        await commandeApi.create(payload);
+        alert("Command created successfully!");
+      }
       navigate("/commands");
     } catch (err) {
-      console.error("Failed to save command:", err);
-
       if (err.response?.data?.message === "Not enough stock") {
-        alert(`⚠ ${err.response.data.message}. Available stock: ${err.response.data.stock}`);
+        alert(`Not enough stock! Available: ${err.response.data.stock}`);
       } else {
-        alert(t("commands.saveError", "Failed to save command"));
+        alert("Failed to save command");
       }
     }
   };
 
-  if (loading) {
-    return <div className="loading">{t("commands.loading", "Loading form...")}</div>;
-  }
-
-  if (error) {
-    return <div className="error-banner">{error}</div>;
-  }
-
   return (
-    <div className="new-command-page">
-      <h1>{t("commands.newCommandTitle", "Create New Command")}</h1>
+    <div className="min-h-screen flex flex-col p-6">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">
+          {isEdit ? t("commands.editCommand") : t("commands.newCommand")}
+        </h1>
+        <p className="text-gray-600 mt-2">
+          {isEdit ? "Update command details" : "Fill in the order step by step"}
+        </p>
+      </div>
 
-      <MultiStepCommandForm
-        onSave={handleSave}
-        onCancel={() => navigate("/commands")}
-        products={products}
-        livreurs={livreurs}
-        preparateurs={preparateurs}
-      />
+      {/* Content */}
+      {loading ? (
+        <div className="flex items-center justify-center flex-1">
+          <div className="text-xl">{t("loading")}...</div>
+        </div>
+      ) : (
+        <CommandForm
+          command={command}
+          onSave={handleSave}
+          onCancel={() => navigate("/commands")}
+          products={products}
+          livreurs={livreurs}
+          preparateurs={preparateurs}
+        />
+      )}
     </div>
   );
 }
+

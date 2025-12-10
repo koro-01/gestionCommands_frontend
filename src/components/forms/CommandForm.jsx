@@ -1,217 +1,287 @@
+// components/forms/CreateCommandWizard.jsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import "../../styles/components/command-form.css"; // Assuming you have a separate CSS for this form
+import { FaChevronLeft, FaChevronRight, FaSave, FaTimes } from "react-icons/fa";
+import "../../styles/components/create-command-wizard.css";
 
-import produitApi from "../../api/produitApi";
-import livreurApi from "../../api/livreurApi";
-import preparateurApi from "../../api/preparateurApi";
+const steps = [
+  { id: 1, name: "Client Info" },
+  { id: 2, name: "Product & Stock" },
+  { id: 3, name: "Preparation" },
+  { id: 4, name: "Delivery" },
+  { id: 5, name: "Review" },
+];
 
-import { FaSave, FaTimes } from "react-icons/fa";
-
-export default function CommandForm({ command, onSave, onCancel }) {
+export default function CommandForm({
+  command,
+  onSave,
+  onCancel,
+  products = [],
+  livreurs = [],
+  preparateurs = [],
+}) {
   const { t } = useTranslation();
-
-  const initIdRef = useRef(null);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const [formData, setFormData] = useState({
-    nom: "",
-    phone: "",
-    destination: "",
-    productId: "",
-    livreurId: "",
-    preparateurId: "",
-    status: "pending",
-    quantity: 1,
+    nom: command?.nom || "",
+    phone: command?.phone || "",
+    destination: command?.destination || "",
+    productId: command?.produit_id || "",
+    quantity: command?.Qtte || 1,
+    preparateurId: command?.preparateur_id || "",
+    livreurId: command?.livreur_id || "",
+    status: command?.status || "pending",
   });
 
-  const [products, setProducts] = useState([]);
-  const [livreurs, setLivreurs] = useState([]);
-  const [preparateurs, setPreparateurs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   useEffect(() => {
-    if (command && initIdRef.current !== command.id) {
-      setFormData({
-        nom: command.nom ?? "",
-        phone: command.phone ?? "",
-        destination: command.destination ?? "",
-        productId: command.produit_id ?? command.product?.id ?? "",
-        livreurId: command.livreur_id ?? command.livreur?.id ?? "",
-        preparateurId: command.preparateur_id ?? command.preparateur?.id ?? "",
-        status: command.status || "pending",
-        quantity: Number(command.Qtte ?? command.quantity ?? command.product?.Qtte ?? 1),
-      });
-      initIdRef.current = command.id;
+    if (formData.productId) {
+      const prod = products.find((p) => p.id === Number(formData.productId));
+      setSelectedProduct(prod);
     }
-    fetchFormOptions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [command?.id]);
+  }, [formData.productId, products]);
 
-  const fetchFormOptions = async () => {
-    try {
-      setLoading(true);
-      const [pRes, lRes, prRes] = await Promise.all([
-        produitApi.getAll(),
-        livreurApi.getAll(),
-        preparateurApi.getAll(),
-      ]);
-      setProducts(pRes?.data ?? pRes ?? []);
-      setLivreurs(lRes?.data ?? lRes ?? []);
-      setPreparateurs(prRes?.data ?? prRes ?? []);
-    } catch (error) {
-      console.error("Failed to fetch form options:", error);
-    } finally {
-      setLoading(false);
+  const updateField = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const nextStep = () => {
+    if (currentStep < 5) setCurrentStep(currentStep + 1);
+  };
+
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep(currentStep - 1);
+  };
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return formData.nom && formData.phone && formData.destination;
+      case 2:
+        return formData.productId && formData.quantity > 0;
+      case 3:
+        return formData.preparateurId;
+      case 4:
+        return formData.livreurId;
+      case 5:
+        return true;
+      default:
+        return false;
     }
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "quantity" ? Number.parseInt(value || "0", 10) : value,
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.productId || !formData.livreurId || !formData.preparateurId) {
-      alert(t("commands.formCommand.selectProduct"));
-      return;
-    }
-
+  const handleSubmit = () => {
     const payload = {
-      nom: formData.nom || null,
-      phone: formData.phone || null,
-      destination: formData.destination || null,
+      nom: formData.nom,
+      phone: formData.phone,
+      destination: formData.destination,
       produit_id: Number(formData.productId),
-      livreur_id: Number(formData.livreurId),
-      preparateur_id: Number(formData.preparateurId),
-      status: formData.status,
       Qtte: Number(formData.quantity),
+      preparateur_id: Number(formData.preparateurId),
+      livreur_id: Number(formData.livreurId),
+      status: formData.status,
     };
-
     onSave(payload);
   };
 
+  const availableStock = selectedProduct?.Qtte || 0;
+  const notEnoughStock = formData.quantity > availableStock;
+
   return (
-    <form className="command-form" onSubmit={handleSubmit}>
-      <div className="form-group">
-        <label>{t("commands.formCommand.nom")}</label>
-        <input
-          name="nom"
-          value={formData.nom}
-          onChange={handleChange}
-          placeholder={t("commands.formCommand.nom")}
-        />
+    <div className="wizard-container">
+      {/* Progress Bar */}
+     <div
+  className="wizard-steps"
+  style={{
+    "--current-step": currentStep,
+    "--total-steps": steps.length,
+  }}
+>
+  {steps.map((step, index) => (
+    <div key={step.id} className={`step ${currentStep >= step.id ? "active" : ""} ${currentStep > step.id ? "completed" : ""}`}>
+      <div className="step-circle">{currentStep > step.id ? "✓" : step.id}</div>
+      <div className="step-label">{t(`wizard.step${step.id}`) || step.name}</div>
+    </div>
+  ))}
+</div>
+
+
+      <div className="wizard-content">
+        {/* Step 1: Client Info */}
+        {currentStep === 1 && (
+          <div className="step-panel">
+            <h3>{t("wizard.clientInfo")}</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>{t("commands.formCommand.nom")}</label>
+                <input
+                  value={formData.nom}
+                  onChange={(e) => updateField("nom", e.target.value)}
+                  placeholder="Ahmed Mohamed"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>{t("commands.formCommand.phone")}</label>
+                <input
+                  value={formData.phone}
+                  onChange={(e) => updateField("phone", e.target.value)}
+                  placeholder="+212 6 00 00 00 00"
+                />
+              </div>
+              <div className="form-group full">
+                <label>{t("commands.formCommand.destination")}</label>
+                <input
+                  value={formData.destination}
+                  onChange={(e) => updateField("destination", e.target.value)}
+                  placeholder="Casablanca, Maarif..."
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Product & Stock */}
+        {currentStep === 2 && (
+          <div className="step-panel">
+            <h3>{t("wizard.productStock")}</h3>
+            <div className="form-group">
+              <label>{t("commands.formCommand.product")}</label>
+              <select
+                value={formData.productId}
+                onChange={(e) => updateField("productId", e.target.value)}
+              >
+                <option value="">{t("commands.formCommand.selectProduct")}</option>
+                {products.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.description} ({p.Qtte} in stock)
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedProduct && (
+              <>
+                <div className="stock-info">
+                  <strong>Stock: {availableStock} units</strong>
+                  {notEnoughStock && (
+                    <p className="text-red-600 font-bold">
+                      Not enough stock! Only {availableStock} available.
+                    </p>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label>{t("commands.formCommand.quantity")}</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={availableStock}
+                    value={formData.quantity}
+                    onChange={(e) => updateField("quantity", parseInt(e.target.value) || 1)}
+                  />
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Step 3: Preparation */}
+        {currentStep === 3 && (
+          <div className="step-panel">
+            <h3>{t("wizard.preparation")}</h3>
+            <div className="form-group">
+              <label>{t("commands.formCommand.preparateur")}</label>
+              <select
+                value={formData.preparateurId}
+                onChange={(e) => updateField("preparateurId", e.target.value)}
+              >
+                <option value="">{t("commands.formCommand.selectPreparateur")}</option>
+                {preparateurs.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Delivery */}
+        {currentStep === 4 && (
+          <div className="step-panel">
+            <h3>{t("wizard.delivery")}</h3>
+            <div className="form-group">
+              <label>{t("commands.formCommand.deliveryPerson")}</label>
+              <select
+                value={formData.livreurId}
+                onChange={(e) => updateField("livreurId", e.target.value)}
+              >
+                <option value="">{t("commands.formCommand.selectLivreur")}</option>
+                {livreurs.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.nom}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Step 5: Review */}
+        {currentStep === 5 && (
+          <div className="step-panel">
+            <h3>{t("wizard.review")}</h3>
+            <div className="review-grid">
+              <div><strong>Client:</strong> {formData.nom}</div>
+              <div><strong>Phone:</strong> {formData.phone}</div>
+              <div><strong>Address:</strong> {formData.destination}</div>
+              <div><strong>Product:</strong> {selectedProduct?.description}</div>
+              <div><strong>Quantity:</strong> {formData.quantity}</div>
+              <div><strong>Preparer:</strong> {preparateurs.find(p => p.id === Number(formData.preparateurId))?.nom}</div>
+              <div><strong>Deliverer:</strong> {livreurs.find(l => l.id === Number(formData.livreurId))?.nom}</div>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="form-group">
-        <label>{t("commands.formCommand.phone")}</label>
-        <input
-          name="phone"
-          value={formData.phone}
-          onChange={handleChange}
-          placeholder={t("commands.formCommand.phone")}
-        />
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.destination")}</label>
-        <input
-          name="destination"
-          value={formData.destination}
-          onChange={handleChange}
-          placeholder={t("commands.formCommand.destination")}
-        />
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.product")}</label>
-        <select
-          name="productId"
-          value={formData.productId}
-          onChange={handleChange}
-          required
-          disabled={loading}
-        >
-          <option value="">{t("commands.formCommand.selectProduct")}</option>
-          {products.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.description ?? p.nom ?? p.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.deliveryPerson")}</label>
-        <select
-          name="livreurId"
-          value={formData.livreurId}
-          onChange={handleChange}
-          required
-          disabled={loading}
-        >
-          <option value="">{t("commands.formCommand.selectLivreur")}</option>
-          {livreurs.map((l) => (
-            <option key={l.id} value={l.id}>
-              {l.nom ?? l.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.preparateur")}</label>
-        <select
-          name="preparateurId"
-          value={formData.preparateurId}
-          onChange={handleChange}
-          required
-          disabled={loading}
-        >
-          <option value="">{t("commands.formCommand.selectPreparateur")}</option>
-          {preparateurs.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.nom ?? p.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.quantity")}</label>
-        <input
-          type="number"
-          name="quantity"
-          value={formData.quantity}
-          onChange={handleChange}
-          min="1"
-          required
-        />
-      </div>
-
-      <div className="form-group">
-        <label>{t("commands.formCommand.status")}</label>
-        <select name="status" value={formData.status} onChange={handleChange}>
-          <option value="pending">{t("commands.formCommand.pending")}</option>
-          <option value="in_progress">{t("commands.formCommand.in_progress")}</option>
-          <option value="completed">{t("commands.formCommand.completed")}</option>
-          <option value="cancelled">{t("commands.formCommand.cancelled")}</option>
-        </select>
-      </div>
-
-      <div className="form-actions">
-        <button type="submit" className="btn-primary" disabled={loading}>
-          <FaSave style={{ marginRight: 8 }} /> {loading ? t("commands.formCommand.loading") : t("commands.formCommand.save")}
-        </button>
+      {/* Navigation Buttons */}
+      <div className="wizard-actions">
         <button type="button" className="btn-secondary" onClick={onCancel}>
-          <FaTimes style={{ marginRight: 8 }} /> {t("commands.formCommand.cancel")}
+          <FaTimes /> {t("commands.formCommand.cancel")}
         </button>
+
+        <div className="flex gap-3">
+          {currentStep > 1 && (
+            <button type="button" className="btn-outline" onClick={prevStep}>
+              <FaChevronLeft /> Previous
+            </button>
+          )}
+          {currentStep < 5 ? (
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={nextStep}
+              disabled={!isStepValid() || (currentStep === 2 && notEnoughStock)}
+            >
+              Next <FaChevronRight />
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn-success"
+              onClick={handleSubmit}
+              disabled={notEnoughStock}
+            >
+              <FaSave /> {command ? "Update" : "Create"} Order
+            </button>
+          )}
+        </div>
       </div>
-    </form>
+    </div>
   );
 }

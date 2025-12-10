@@ -1,0 +1,321 @@
+/* ─────────────────────────────────────────────
+   WIZARD CONTAINER
+──────────────────────────────────────────────*/
+.wizard-container {
+  width: 500px;
+  margin: 0 auto;
+  padding: 2rem;
+  background: var(--surface, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.dark .wizard-container {
+  background: var(--surface-dark);
+}
+
+/* ─────────────────────────────────────────────
+   STEPS / PROGRESS BAR
+──────────────────────────────────────────────*/
+.wizard-steps {
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scrollbar-width: thin;
+
+  /* CSS variables for progress */
+  --current-step: 1;
+  --total-steps: 5;
+}
+
+/* Scrollbar styling */
+.wizard-steps::-webkit-scrollbar {
+  height: 6px;
+}
+
+.wizard-steps::-webkit-scrollbar-track {
+  background: var(--border);
+  border-radius: 10px;
+}
+
+.dark .wizard-steps::-webkit-scrollbar-track {
+  background: var(--border-dark);
+}
+
+.wizard-steps::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+/* Full background line */
+.wizard-steps::before {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  z-index: 1;
+  border-radius: 2px;
+}
+
+/* Filled progress line */
+.wizard-steps::after {
+  content: "";
+  position: absolute;
+  top: 20px;
+  left: 0;
+  height: 4px;
+  background: #10b981;
+  z-index: 1;
+  border-radius: 2px;
+  width: calc((var(--current-step) - 1) / (var(--total-steps) - 1) * 100%);
+  transition: width 0.3s ease;
+}
+
+/* Individual steps (circles) */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  z-index: 2; /* keep circles above line */
+}
+
+.step-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--border);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.dark .step-circle {
+  background: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.step.active .step-circle {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.step.completed .step-circle {
+  background: #10b981;
+  color: white;
+}
+
+/* Step labels */
+.step-label {
+  margin-top: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--text-light, #6b7280);
+}
+
+.dark .step-label {
+  color: var(--text-dark);
+}
+
+.step.active .step-label {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ─────────────────────────────────────────────
+   WIZARD CONTENT
+──────────────────────────────────────────────*/
+.wizard-content {
+  min-height: 350px;
+  padding: 1.5rem 0;
+}
+
+.step-panel h3 {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  color: var(--text);
+}
+
+.dark .step-panel h3 {
+  color: var(--text-dark);
+}
+
+/* GRID */
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .form-grid .full {
+    grid-column: span 2;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   FORM ELEMENTS
+──────────────────────────────────────────────*/
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.dark .form-group label {
+  color: var(--text-dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+  color: var(--text-dark);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  outline: none;
+}
+
+/* ─────────────────────────────────────────────
+   REVIEW BOX
+──────────────────────────────────────────────*/
+.review-grid {
+  display: grid;
+  gap: 1rem;
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+}
+
+.dark .review-grid {
+  background: var(--surface-dark);
+  border-color: var(--border-dark);
+}
+
+.review-grid div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.dark .review-grid div {
+  border-color: var(--border-dark);
+}
+
+/* ─────────────────────────────────────────────
+   ACTIONS / BUTTONS
+──────────────────────────────────────────────*/
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.wizard-actions button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+/* Primary / success */
+.btn-success,
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled),
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-dark);
+}
+
+/* Secondary */
+.btn-secondary {
+  background: #e5e7eb;
+  color: var(--text);
+}
+
+.dark .btn-secondary {
+  background: var(--surface-dark);
+  color: var(--text-dark);
+}
+
+.btn-secondary:hover {
+  background: #d1d5db;
+}
+
+.dark .btn-secondary:hover {
+  background: var(--border-dark);
+}
+
+/* ─────────────────────────────────────────────
+   RESPONSIVE
+──────────────────────────────────────────────*/
+@media (max-width: 768px) {
+  .wizard-steps {
+    gap: 1rem;
+    justify-content: flex-start;
+  }
+  .step {
+    min-width: 80px;
+  }
+  .wizard-actions {
+    flex-direction: column-reverse;
+  }
+  .wizard-actions button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-label {
+    display: none;
+  }
+  .step {
+    min-width: 60px;
+  }
+}

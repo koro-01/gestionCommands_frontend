@@ -11,6 +11,7 @@ import Products from "./pages/Products"
 import Livreurs from "./pages/Livreurs"
 import Preparateurs from "./pages/Preparateurs"
 import NewCommandPage from "./pages/NewCommandPage"
+import NewCommandPage from "./pages/NewCommandPage"
 import "./App.css"
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
               <Route path="/livreurs" element={<Livreurs />} />
               <Route path="/preparateurs" element={<Preparateurs />} />
               <Route path="/commands/new" element={<NewCommandPage />} />
+               <Route path="/commands/new" element={<NewCommandPage />} />
             </Routes>
           </main>
         </div>
